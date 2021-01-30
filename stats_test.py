@@ -41,6 +41,7 @@ def main():
 
     print('calculate statistics')
     px_man.calculate_stats()
+    cv2.imshow('centroid', px_man.get_centroid())
 
     # start statistics collection
     print('[1] classify pixels')
@@ -48,6 +49,9 @@ def main():
 
         # capture frame-by-frame
         ret, frame = cap.read()
+
+        # show original frame
+        cv2.imshow('org_frame', frame)
 
         # get pixel mask
         mask = px_man.get_mask(frame)
