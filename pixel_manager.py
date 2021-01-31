@@ -60,6 +60,6 @@ class PixelManager:
 
         # convert to color mask
         output_mask = np.zeros_like(frame)
-        output_mask[:, :, 2] = np.round(255 * (dist_arr > self._max_dist * 10)).astype(frame.dtype)
+        output_mask[:, :, 2] = np.round(255 * ((dist_arr - self._max_dist) > 60)).astype(frame.dtype)
 
         return output_mask
