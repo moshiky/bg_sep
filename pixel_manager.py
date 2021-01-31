@@ -6,7 +6,7 @@ class PixelManager:
 
     def __init__(self, height: int, width: int, sample_size: int):
 
-        self._frame_bank = np.zeros((sample_size, int(height), int(width)), dtype=np.float64)
+        self._frame_bank = np.zeros((sample_size, int(height), int(width), 3), dtype=np.float64)
         self._next_idx = 0
 
         self._centroid_img = None
@@ -14,8 +14,7 @@ class PixelManager:
 
     @staticmethod
     def _normalize_frame(frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(np.float64)
-        return frame
+        return frame.astype(np.float64)
 
     def get_centroid(self):
         return self._centroid_img.round().astype(np.uint8)
@@ -23,7 +22,7 @@ class PixelManager:
     def add_frame(self, frame: np.array):
 
         if self._next_idx < self._frame_bank.shape[0]:
-            self._frame_bank[self._next_idx, :, :] = self._normalize_frame(frame)
+            self._frame_bank[self._next_idx, :, :, :] = self._normalize_frame(frame)
             self._next_idx += 1
 
             return True
@@ -33,7 +32,7 @@ class PixelManager:
 
     @staticmethod
     def _get_dist(im0: np.array, im1: np.array):
-        return np.sqrt(np.power(im0 - im1, 2))
+        return np.sqrt(np.power(im0 - im1, 2).sum(axis=-1))
 
     def calculate_stats(self):
 
@@ -60,6 +59,7 @@ class PixelManager:
         dist_arr = self._get_dist(norm_frame, self._centroid_img)
 
         # convert to color mask
-        output_mask = np.round(255 * (dist_arr > self._max_dist * 4)).astype(frame.dtype)
+        output_mask = np.zeros_like(frame)
+        output_mask[:, :, 2] = np.round(255 * (dist_arr > self._max_dist * 10)).astype(frame.dtype)
 
         return output_mask
